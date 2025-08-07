@@ -1,25 +1,6 @@
 version: '3.8'
 
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
-      MONGO_INITDB_DATABASE: itemdb
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - app-network
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      timeout: 10s
-      retries: 5
-
   backend:
     build:
       context: ./backend
@@ -27,46 +8,39 @@ services:
     container_name: fastapi-backend
     ports:
       - "8000:8000"
+    env_file:
+      - ./backend/.env  # This loads your MongoDB Atlas connection
     environment:
-      # Use local MongoDB instead of Atlas for development
-      MONGO_URI: mongodb+srv://oluwatobiakinyeke:BakBfWUsEJBIcm9D@tolucluster.gjeu6nm.mongodb.net/?retryWrites=true&w=majority&appName=ToluCluster
-      DB_NAME: itemdb
-      COLLECTION_NAME: items
+      # Override or add additional environment variables if needed
       PORT: 8000
-    depends_on:
-      mongodb:
-        condition: service_healthy
     networks:
       - app-network
-    volumes:
-      - ./backend:/app:ro  # Mount for development (read-only)
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+    volumes:
+      - ./backend:/app  # For development hot-reload
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        REACT_APP_API_URL: http://backend:8000
-
-    container_name: react-frontend
+        VITE_API_BASE_URL: http://localhost:8000
+    container_name: vite-frontend
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_API_URL: http://backend:8000
-
+      VITE_API_BASE_URL: http://localhost:8000
     depends_on:
       - backend
     networks:
       - app-network
+    volumes:
+      - ./frontend/src:/app/src  # For development hot-reload (if needed)
 
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  mongo-data:

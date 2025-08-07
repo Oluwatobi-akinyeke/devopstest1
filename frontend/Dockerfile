@@ -10,11 +10,14 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci  && \
-    npm cache clean --force
+RUN npm ci
 
 # Copy all frontend source files
 COPY . .
+
+# Set build-time environment variable for Vite
+ARG VITE_API_BASE_URL=http://localhost:8000
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # Build the application
 RUN npm run build
@@ -22,30 +25,31 @@ RUN npm run build
 # Stage 2: Production stage with nginx
 FROM nginx:alpine
 
-# Install necessary packages for runtime
-RUN apk add --no-cache \
-    curl \
-    && rm -rf /var/cache/apk/*
-
-# Create non-root user for nginx
-RUN adduser -D -H -u 1000 -s /sbin/nologin appuser
-
-# Copy built files from builder stage
+# Copy built files from builder stage (Vite uses 'dist' not 'build')
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration
-COPY --chown=appuser:appuser nginx.conf /etc/nginx/conf.d/default.conf
+# Custom nginx configuration for port 3000
+RUN echo 'server { \
+    listen 3000; \
+    server_name localhost; \
+    location / { \
+        root /usr/share/nginx/html; \
+        index index.html; \
+        try_files $uri $uri/ /index.html; \
+    } \
+    location /api { \
+        proxy_pass http://backend:8000; \
+        proxy_http_version 1.1; \
+        proxy_set_header Upgrade $http_upgrade; \
+        proxy_set_header Connection "upgrade"; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
 
-# Create nginx cache and pid directories with correct permissions
-RUN mkdir -p /var/cache/nginx /var/run/nginx && \
-    chown -R appuser:appuser /var/cache/nginx /var/run/nginx /usr/share/nginx/html && \
-    touch /var/run/nginx.pid && \
-    chown appuser:appuser /var/run/nginx.pid
-
-# Switch to non-root user
-USER appuser
-
-# Expose port 3000 (as requested)
+# Expose port 3000
 EXPOSE 3000
 
 # Health check
