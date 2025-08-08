@@ -121,6 +121,7 @@ jobs:
                 environment:
                   - MONGO_URI=${{ secrets.MONGO_URI }}
                   - DB_NAME=${{ secrets.DB_NAME }}
+                  - COLLECTION_NAME=${{ secrets.COLLECTION_NAME }}
                 healthcheck:
                   test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
                   interval: 30s
