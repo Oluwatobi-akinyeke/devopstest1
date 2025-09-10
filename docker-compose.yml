@@ -10,18 +10,14 @@ services:
       - "8000:8000"
     env_file:
       - ./backend/.env  # This loads your MongoDB Atlas connection
-    environment:
-      # Override or add additional environment variables if needed
-      PORT: 8000
+
     networks:
       - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
-    volumes:
-      - ./backend:/app  # For development hot-reload
+      retries : 3
 
   frontend:
     build:
@@ -29,18 +25,13 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: http://localhost:8000
-    container_name: vite-frontend
     ports:
       - "3000:3000"
-    environment:
-      VITE_API_BASE_URL: http://localhost:8000
+    
     depends_on:
       - backend
     networks:
       - app-network
-    volumes:
-      - ./frontend/src:/app/src  # For development hot-reload (if needed)
-
 networks:
   app-network:
     driver: bridge
