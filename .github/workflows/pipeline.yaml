@@ -27,14 +27,14 @@ jobs:
       # Step 4: Build and push backend image
       - name: Build and Push Backend
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/inventory-backend:${{ env.IMAGE_TAG }} ./backend
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/inventory-backend:${{ env.IMAGE_TAG }}
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/devopstest1-backend:${{ env.IMAGE_TAG }} ./backend
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/devopstest1-backend:${{ env.IMAGE_TAG }}
 
       # Step 5: Build and push frontend image
       - name: Build and Push Frontend
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/inventory-frontend:${{ env.IMAGE_TAG }} ./frontend
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/inventory-frontend:${{ env.IMAGE_TAG }}
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/devopstest1-frontend:${{ env.IMAGE_TAG }} ./frontend
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/devopstest1-frontend:${{ env.IMAGE_TAG }}
 
       # Step 6: Deploy to EC2 using Docker Compose
       - name: Deploy via SSH
@@ -47,8 +47,8 @@ jobs:
             cd /home/${{ secrets.EC2_USER }}/inventory-app
 
             # Update docker-compose file with new image tags
-            sed -i "s|inventory-backend:.*|inventory-backend:${{ env.IMAGE_TAG }}|g" docker-compose.prod.yml
-            sed -i "s|inventory-frontend:.*|inventory-frontend:${{ env.IMAGE_TAG }}|g" docker-compose.prod.yml
+            sed -i "s|devopstest1-backend:.*|devopstest1-backend:${{ env.IMAGE_TAG }}|g" docker-compose.prod.yml
+            sed -i "s|devopstest1-frontend:.*|devopstest1-frontend:${{ env.IMAGE_TAG }}|g" docker-compose.prod.yml
 
             docker-compose -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.prod.yml up -d
