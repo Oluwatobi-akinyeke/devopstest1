@@ -1,17 +1,26 @@
-# backend/Dockerfile
+# Stage 1
 
-# Stage 1: install dependencies
-FROM python:3.11-slim AS builder
+FROM python:3.11-slim AS backend_builder
+
 WORKDIR /app
+
 COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
 
-# Stage 2: run application
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+
+# Stage 2
+
 FROM python:3.11-slim
+
 WORKDIR /app
-COPY --from=builder /root/.local /root/.local
-COPY . . 
-ENV PATH=/root/.local/bin:$PATH
-EXPOSE 8000
+
+ENV PYTHONUNBUFFERED=1
+
+COPY --from=backend_builder /install /usr/local
+
+COPY main.py .
+
+EXPOSE 8000 
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
