@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, status, Depends
 from pydantic import BaseModel
 import uvicorn
+import certifi
 import logging
 from datetime import datetime, timezone
 import os
@@ -24,6 +25,8 @@ MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("DB_NAME")
 COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 
+CA_FILE = certifi.where()
+
 # MongoDB client (initialized in lifespan)
 client = None
 db = None
@@ -41,10 +44,10 @@ def convert_objectid(document: dict) -> dict:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global client, db, items_collection
-    client = AsyncIOMotorClient(MONGO_URI)
+    client = AsyncIOMotorClient(MONGO_URI, tlsCAFile=CA_FILE)
     db = client[DB_NAME]
     items_collection = db[COLLECTION_NAME]
-    logger.info("Connected to MongoDB.")
+    logger.info("Connected to MongoDB using verified SSL.")
     yield
     client.close()
     logger.info("MongoDB connection closed.")
