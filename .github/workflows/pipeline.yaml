@@ -72,20 +72,17 @@ jobs:
           key: ${{ secrets.SSH_KEY_PRIVATE_FILE }}
           script: |
             DEPLOY_DIR="/opt/devopstest"
-            
+
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             
             cd $DEPLOY_DIR
 
             echo "Starting deployment..."
 
-            FULL_COMMAND="
-            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} \
             MONGO_URI=${{ secrets.MONGO_URI }} \
-            VITE_API_BASE_URL=${{ secrets.DEPLOYMENT_SERVER_IP }}:8000 \
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} \
+            VITE_API_BASE_URL=http://${{ secrets.DEPLOYMENT_SERVER_IP }}:8000 \
             docker compose up -d --force-recreate
-            "
-
             echo "Pulling latest images..."
             
             MONGO_URI=${{ secrets.MONGO_URI }} docker compose pull
