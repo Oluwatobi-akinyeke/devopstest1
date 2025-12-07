@@ -87,8 +87,4 @@ jobs:
             
             MONGO_URI=${{ secrets.MONGO_URI }} docker compose pull
 
-            echo "Running containers..."
-            
-            $FULL_COMMAND
-
             echo "Deployment successful."
