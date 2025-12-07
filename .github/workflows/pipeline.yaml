@@ -20,7 +20,7 @@ jobs:
           
       - name: Install Dependencies and Run Tests
         run: |
-          pip install -r backend/requirements.txt
+          pip install -r requirements.txt
           python backend/test.py
         working-directory: ./backend
       
