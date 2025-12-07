@@ -80,13 +80,10 @@ jobs:
             FULL_COMMAND="
             DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} \
             MONGO_URI=${{ secrets.MONGO_URI }} \
-            DB_NAME=itemdb \
-            COLLECTION_NAME=items \
-            PORT=8000 \
             VITE_API_BASE_URL=${{ secrets.DEPLOYMENT_SERVER_IP }}:8000 \
             docker compose up -d --force-recreate
             "
-            
+
             echo "Pulling latest images..."
             
             MONGO_URI=${{ secrets.MONGO_URI }} docker compose pull
@@ -95,4 +92,4 @@ jobs:
             
             $FULL_COMMAND
 
-echo "Deployment successful."
+            echo "Deployment successful."
