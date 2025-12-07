@@ -85,6 +85,7 @@ jobs:
             echo "--- 📥 Pulling latest images... ---"
             DOCKER_USERNAME=$DOCKER_USER \
             MONGO_URI=$MONGO_URI_SECRET \
+            VITE_API_BASE_URL=$API_HOST_PORT \
             docker compose pull
             
             echo "--- 🚀 Running containers with new images... ---"
