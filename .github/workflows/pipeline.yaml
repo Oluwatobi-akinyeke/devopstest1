@@ -71,6 +71,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY_PRIVATE_FILE }}
           script: |
+            DEPLOY_DIR="/opt/devopstest"
+            
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             
             cd $DEPLOY_DIR
