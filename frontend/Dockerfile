@@ -1,16 +1,30 @@
-# Frontend Dockerfile (frontend/Dockerfile)
+# Stage 1
 
-FROM node:18-alpine AS builder
+FROM node:20 AS frontend_builder
+
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-ARG VITE_API_BASE_URL=http://localhost:8000
-RUN npm run build
 
-# Stage 2: Serve with nginx
+ARG VITE_API_BASE_URL
+
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
+COPY package.json package-lock.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build 
+
+
+# Stage 2
+
 FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-RUN echo 'server {listen 3000; location / {root /usr/share/nginx/html; try_files $uri /index.html;}}' > /etc/nginx/conf.d/default.conf
-EXPOSE 3000
-CMD ["nginx", "-g", "daemon off;"]
+
+RUN rm /etc/nginx/conf.d/default.conf
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=frontend_builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80

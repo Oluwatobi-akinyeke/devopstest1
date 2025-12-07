@@ -8,3 +8,5 @@ asyncio
 python-dotenv
 black
 httpx
+dnspython
+certifi
