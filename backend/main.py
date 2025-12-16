@@ -27,6 +27,10 @@ COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 
 CA_FILE = certifi.where()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # ...
+    client = AsyncIOMotorClient(MONGO_URI, tlsCAFile=CA_FILE)
 # MongoDB client (initialized in lifespan)
 client = None
 db = None
