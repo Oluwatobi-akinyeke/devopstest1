@@ -1,37 +1,21 @@
-
-
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: backend
+    image: ${DOCKER_USERNAME}/backend:latest   # Pull from Docker Hub
+    container_name: backend_app
+    restart: always
     ports:
       - "8000:8000"
-    env_file:
-      - ./backend/.env  # This loads your MongoDB Atlas connection
-
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries : 3
+    environment:
+      MONGO_URI: "${MONGO_URI}"
+      DB_NAME: "itemdb"
+      COLLECTION_NAME: "items"
+      PORT: "8000"
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: http://localhost:8000
+    image: ${DOCKER_USERNAME}/frontend:latest
+    container_name: frontend_app
+    restart: always
     ports:
       - "3000:3000"
-    
-    depends_on:
-      - backend
-    networks:
-      - app-network
-networks:
-  app-network:
-    driver: bridge
+    environment:
+      VITE_API_BASE_URL: "http://${VITE_API_BASE_URL}"
